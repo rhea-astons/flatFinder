@@ -143,25 +143,25 @@ def main():
 	os.path.join(os.path.abspath(os.path.dirname(__file__)), 'conf', 'config.cfg')
 	config.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'flatFinder.cfg'))
 
-	dataFile			= config.get('main', 'dataFile')
+	dataFile = config.get('main', 'dataFile')
 
-	flat_canton			= config.get('flat', 'canton')
-	flat_price_min		= config.get('flat', 'price_min')
+	flat_canton = config.get('flat', 'canton')
+	flat_price_min = config.get('flat', 'price_min')
 	if flat_price_min == 'None':
 		flat_price_min = None
-	flat_price_max		= config.get('flat', 'price_max')
+	flat_price_max = config.get('flat', 'price_max')
 	if flat_price_max == 'None':
 		flat_price_max = None
-	flat_surface_min	= config.get('flat', 'surface_min')
+	flat_surface_min = config.get('flat', 'surface_min')
 	if flat_surface_min == 'None':
 		flat_surface_min = None
-	flat_surface_max	= config.get('flat', 'surface_max')
+	flat_surface_max = config.get('flat', 'surface_max')
 	if flat_surface_max == 'None':
 		flat_surface_max = None
-	flat_rooms_min		= config.get('flat', 'rooms_min')
+	flat_rooms_min = config.get('flat', 'rooms_min')
 	if flat_rooms_min == 'None':
 		flat_rooms_min = None
-	flat_rooms_max		= config.get('flat', 'rooms_max')
+	flat_rooms_max = config.get('flat', 'rooms_max')
 	if flat_rooms_max == 'None':
 		flat_rooms_max = None
 
