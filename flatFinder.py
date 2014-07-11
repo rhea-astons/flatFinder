@@ -52,8 +52,8 @@ def pushover(userKey, apiToken, title, message, link, link_title) :
 				}),
 			{"Content-type": "application/x-www-form-urlencoded"}
 		)
-	except Exception, e:
-		print e
+	except Exception:
+		pass
 
 
 
