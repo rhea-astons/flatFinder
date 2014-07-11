@@ -49,7 +49,7 @@ def pushover(userKey, apiToken, title, message) :
 				}),
 			{"Content-type": "application/x-www-form-urlencoded"}
 		)
-	except Exception e:
+	except Exception:
 		pass
 
 
@@ -165,7 +165,7 @@ def main():
 	if flat_rooms_max == 'None':
 		flat_rooms_max = None
 
-	pushoverClients		= config.items('pushover')
+	pushoverClients	= config.items('pushover')
 	temp = []
 	for pushoverClient in pushoverClients:
 		user_key = pushoverClient[1].split(',')[0]
