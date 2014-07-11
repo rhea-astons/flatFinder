@@ -12,7 +12,8 @@ from time import sleep
 
 
 class Flat:
-	def __init__(self, description, price, surface, rooms, city, date, link):
+	def __init__(self, title, description, price, surface, rooms, city, date, link):
+		self.title = title
 		self.description = description
 		self.price = price
 		self.surface = surface
@@ -22,10 +23,10 @@ class Flat:
 		self.link = link
 
 	def __eq__(self, other):
-		return isinstance(other, Flat) and self.description == other.description and self.price == other.price and self.city == other.city
+		return isinstance(other, Flat) and self.title == other.title and self.price == other.price and self.city == other.city
 
 	def __str__(self):
-		return self.city + '|' + self.rooms + '|' + self.surface + '|' + self.price + ' [' + self.description + ']'
+		return self.city + '|' + self.rooms + '|' + self.surface + '|' + self.price + ' [' + self.title + ']'
 
 	def __add__(self, other):
 		return str(self) + other
@@ -35,7 +36,7 @@ class Flat:
 
 
 
-def pushover(userKey, apiToken, title, message) :
+def pushover(userKey, apiToken, title, message, link, link_title) :
 	try:
 		cx = httplib.HTTPSConnection("api.pushover.net:443")
 		cx.request(
@@ -45,12 +46,14 @@ def pushover(userKey, apiToken, title, message) :
 				"token": apiToken,
 				"user": userKey,
 				"title": title,
-				"message": message
+				"message": message,
+				"url": link,
+				"url_title": link_title
 				}),
 			{"Content-type": "application/x-www-form-urlencoded"}
 		)
-	except Exception:
-		pass
+	except Exception, e:
+		print e
 
 
 
@@ -102,8 +105,13 @@ def searchAnibis(flat_canton, flat_price_min, flat_price_max, flat_surface_min, 
 		results = soup.find('table', {'class':'items'}).findAll('tr')
 
 		for result in results:
+			for linebreak in result.findAll('br'):
+				linebreak.extract()
+
 			link = domain + result.td.a['href'].encode('utf-8')
-			description = result.td.a.h2.string.encode('utf-8')
+			title = result.td.a.h2.string.encode('utf-8')
+
+			description = ' '.join(results[1].find('span',{'class':'desc'}).stripped_strings).encode('utf-8')
 
 			price = result.find('td', {'class':'price'}).string.encode('utf-8').strip()
 
@@ -125,12 +133,18 @@ def searchAnibis(flat_canton, flat_price_min, flat_price_max, flat_surface_min, 
 			date = infos[0].strip()
 			city = infos[1].strip()
 
-			flats.append(Flat(description, price, surface, rooms, city, date, link))
+			flats.append(Flat(title, description, price, surface, rooms, city, date, link))
 	return flats
 
 
 
 def searchHomegate():
+	flats = []
+	return flats
+
+
+
+def searchImmoscout24():
 	flats = []
 	return flats
 
@@ -185,10 +199,11 @@ def main():
 
 	# Web scraping
 	#######################################################
-	anibis = searchAnibis(flat_canton, flat_price_min, flat_price_max, flat_surface_min, flat_surface_max, flat_rooms_min, flat_rooms_max)
-	homegate = searchHomegate()
+	anibisFlats = searchAnibis(flat_canton, flat_price_min, flat_price_max, flat_surface_min, flat_surface_max, flat_rooms_min, flat_rooms_max)
+	homegateFlats = searchHomegate()
+	immoscout24Flats = searchImmoscout24()
 
-	newFlats = anibis + homegate
+	newFlats = anibisFlats + homegateFlats + immoscout24Flats
 
 	newFound = False
 	for newFlat in newFlats:
@@ -196,7 +211,7 @@ def main():
 			flats.append(newFlat)
 			print "new >> " + newFlat
 			for pushoverClient in pushoverClients:
-				pushover(pushoverClient['user_key'], pushoverClient['api_token'], newFlat , newFlat.link)
+				pushover(pushoverClient['user_key'], pushoverClient['api_token'], newFlat, newFlat.description, newFlat.link, 'Link')
 			newFound = True
 	if not newFound:
 		print "No new flats"
