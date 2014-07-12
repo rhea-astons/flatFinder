@@ -220,16 +220,18 @@ def main():
 
 	newFlats = anibisFlats + homegateFlats + immoscout24Flats
 
-	newFound = False
+	newFound = 0
 	for newFlat in newFlats:
 		if not newFlat in flats:
 			flats.append(newFlat)
 			for pushoverClient in pushoverClients:
 				if not pushover(pushoverClient['user_key'], pushoverClient['api_token'], newFlat, newFlat.description, newFlat.link, 'Link'):
 					logger.warn("Failed to send notification")
-			newFound = True
-	if not newFound:
+			newFound += 1
+	if newFound == 0:
 		logger.info("No new flats")
+	else:
+		logger.info("Found " + str(newFound) + " new flat(s)")
 
 
 	# Save data
