@@ -5,6 +5,7 @@ import urllib2
 import httplib
 import cPickle
 import os.path
+import logging
 from ConfigParser import ConfigParser
 from bs4 import BeautifulSoup as bs
 from time import sleep
@@ -53,7 +54,9 @@ def pushover(userKey, apiToken, title, message, link, link_title) :
 			{"Content-type": "application/x-www-form-urlencoded"}
 		)
 	except Exception:
-		pass
+		return False
+	else:
+		return True
 
 
 
@@ -151,10 +154,22 @@ def searchImmoscout24():
 
 
 def main():
+	# Logger
+	#######################################################
+	logging.basicConfig(level=logging.INFO)
+	logger = logging.getLogger(__name__)
+
+	handler = logging.FileHandler('flatFinder.log')
+	handler.setLevel(logging.INFO)
+
+	formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+	handler.setFormatter(formatter)
+	logger.addHandler(handler)
+
+
 	# Get configuration
 	#######################################################
 	config = ConfigParser()
-	os.path.join(os.path.abspath(os.path.dirname(__file__)), 'conf', 'config.cfg')
 	config.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'flatFinder.cfg'))
 
 	dataFile = config.get('main', 'dataFile')
@@ -209,12 +224,13 @@ def main():
 	for newFlat in newFlats:
 		if not newFlat in flats:
 			flats.append(newFlat)
-			print "new >> " + newFlat
 			for pushoverClient in pushoverClients:
-				pushover(pushoverClient['user_key'], pushoverClient['api_token'], newFlat, newFlat.description, newFlat.link, 'Link')
+				if not pushover(pushoverClient['user_key'], pushoverClient['api_token'], newFlat, newFlat.description, newFlat.link, 'Link'):
+					logger.warn("Failed to send notification")
+				pass
 			newFound = True
 	if not newFound:
-		print "No new flats"
+		logger.info("No new flats")
 
 
 	# Save data
@@ -224,7 +240,7 @@ def main():
 
 	# Done
 	#######################################################
-	print "--- " + str(len(flats)) + " in DB -----------------------------------------------------"
+	logger.info("--- " + str(len(flats)) + " in DB -----------------------------------------------------")
 
 
 
