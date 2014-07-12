@@ -159,7 +159,7 @@ def main():
 	logging.basicConfig(level=logging.INFO)
 	logger = logging.getLogger(__name__)
 
-	handler = logging.FileHandler('flatFinder.log')
+	handler = logging.FileHandler(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'flatFinder.log'))
 	handler.setLevel(logging.INFO)
 
 	formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -206,7 +206,7 @@ def main():
 	# Load data
 	#######################################################
 	if os.path.isfile(os.path.join(os.path.abspath(os.path.dirname(__file__)), dataFile)):
-		with open(dataFile, "rb") as input:
+		with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), dataFile), "rb") as input:
 			flats = cPickle.load(input)
 	else:
 		flats = []
@@ -227,7 +227,6 @@ def main():
 			for pushoverClient in pushoverClients:
 				if not pushover(pushoverClient['user_key'], pushoverClient['api_token'], newFlat, newFlat.description, newFlat.link, 'Link'):
 					logger.warn("Failed to send notification")
-				pass
 			newFound = True
 	if not newFound:
 		logger.info("No new flats")
